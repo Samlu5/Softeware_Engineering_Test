@@ -1,0 +1,171 @@
+import com.google.gson.Gson;
+
+import java.awt.*;
+import javax.swing.*;
+import java.io.BufferedReader;
+import java.util.*;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.*;;
+
+class Entity {
+    String name;
+    int gpsTagId;
+    Point location;
+
+    public Entity(String name, int gpsTagId) {
+        this.name = name;
+        this.gpsTagId = gpsTagId;
+        this.location = new Point(0, 0);
+    }
+
+    public void updateLocation() {
+        this.location = LocationSystem.getCoords(gpsTagId);
+    }
+}
+
+class Lion extends Entity {
+    int age;
+
+    public Lion(String name, int age, int gpsTagId) {
+        super(name, gpsTagId);
+        this.age = age;
+    }
+}
+
+class Keeper extends Entity {
+    String phoneNumber;
+
+    public Keeper(String name, String phoneNumber, int gpsTagId) {
+        super(name, gpsTagId);
+        this.phoneNumber = phoneNumber;
+    }
+}
+
+class Drone extends Entity {
+    int radioFrequency;
+
+    public Drone(String name, int radioFrequency, int gpsTagId) {
+        super(name, gpsTagId);
+        this.radioFrequency = radioFrequency;
+    }
+}
+
+public class LocationSystem {
+    // getCoords returns am AWT Point object that contains the co-ordinates of the GPS tag 'GPSid' passed in
+    // It can return null if it can't find the tag
+    // It can throw an Exception if it can't connect to the GPS system
+    public static Point getCoords(int GPSid) throws IOException {
+        try    {
+            // Connect to the location tracker system
+            URL myURL = new URL("https://liontracker-2342d1c9d397.herokuapp.com/coords?tag="+GPSid);
+            HttpURLConnection conn = (HttpURLConnection) myURL.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("charset", "utf-8");
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(myURL.openStream()));
+
+            String inputLine;
+            String responseBody = new String();
+            // Read the body of the response
+            while ((inputLine = in.readLine()) != null) {
+                responseBody+=inputLine;
+            }
+                    in.close();
+            // Convert from json
+            Gson gson=new Gson();
+            return gson.fromJson(responseBody,Point.class);
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+}
+
+class WildlifeReserveMap extends JPanel {
+    private Entity entities;
+
+    public WildlifeReserveMap(List<Entity> entities) {
+        this.entities = entities;
+        setPreferredSize(new Dimension(600, 600));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        for (Entity entity : entities) {
+            if (entity instanceof Lion) {
+                g.setColor(Color.RED);
+                g.fillOval(entity.location.x, entity.location.y, 6, 6); // Radius 3
+                g.drawString(entity.name + ", Age: " + ((Lion) entity).age, entity.location.x + 10, entity.location.y);
+            } else if (entity instanceof Keeper) {
+                g.setColor(Color.BLUE);
+                g.fillOval(entity.location.x, entity.location.y, 4, 4); // Radius 2
+                g.drawString(entity.name + ", Phone: " + ((Keeper) entity).phoneNumber, entity.location.x + 10, entity.location.y);
+            } else if (entity instanceof Drone) {
+                g.setColor(Color.BLACK);
+                g.fillRect(entity.location.x, entity.location.y, 6, 6); // Edge 3
+                g.drawString(entity.name + ", Freq: " + ((Drone) entity).radioFrequency, entity.location.x + 10, entity.location.y);
+            }
+        }
+    }
+
+    public void refreshMap() {
+        repaint();
+    }
+}
+
+public class AlertSystem {
+    public static void sendAlertkeeper(String phoneNumber){
+        System.out.println("Ringing keeper on "+phoneNumber);
+    }
+    public static void sendAlertdrone(int radioFrequency){
+        System.out.println("Alerting drone on frequency"+radioFrequency);
+    }
+}
+
+public class WildlifeReserveSystem {
+    private List<Entity> entities;
+    private WildlifeReserveMap map;
+
+    public WildlifeReserveSystem() {
+        this.entities = new ArrayList<>();
+    }
+
+    public void addEntity(Entity entity) {
+        entities.add(entity);
+    }
+
+    public void start() {
+        JFrame frame = new JFrame("Wildlife Reserve Map");
+        map = new WildlifeReserveMap(entities);
+        frame.add(map);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
+        while (true) {
+            for (Entity entity : entities) {
+                entity.updateLocation();
+            }
+            map.refreshMap();
+            checkProximity();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void checkProximity() {
+        Lion = null;
+        Keeper = null;
+        Drone = null;
+    }
+}
