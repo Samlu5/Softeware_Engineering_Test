@@ -1,0 +1,191 @@
+<html>
+<head>
+<title>build.gradle</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #0033b3;}
+.s1 { color: #080808;}
+.s2 { color: #1750eb;}
+.s3 { color: #8c8c8c; font-style: italic;}
+.s4 { color: #067d17;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+build.gradle</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">com.google.gson.Gson;</span>
+
+<span class="s0">import </span><span class="s1">java.awt.*;</span>
+<span class="s0">import </span><span class="s1">javax.swing.*;</span>
+<span class="s0">import </span><span class="s1">java.io.BufferedReader;</span>
+<span class="s0">import </span><span class="s1">java.util.*;</span>
+<span class="s0">import </span><span class="s1">java.io.IOException;</span>
+<span class="s0">import </span><span class="s1">java.io.InputStreamReader;</span>
+<span class="s0">import </span><span class="s1">java.net.*;;</span>
+
+<span class="s0">class </span><span class="s1">Entity {</span>
+    <span class="s1">String name;</span>
+    <span class="s0">int </span><span class="s1">gpsTagId;</span>
+    <span class="s1">Point location;</span>
+
+    <span class="s0">public </span><span class="s1">Entity(String name, </span><span class="s0">int </span><span class="s1">gpsTagId) {</span>
+        <span class="s0">this</span><span class="s1">.name = name;</span>
+        <span class="s0">this</span><span class="s1">.gpsTagId = gpsTagId;</span>
+        <span class="s0">this</span><span class="s1">.location = </span><span class="s0">new </span><span class="s1">Point(</span><span class="s2">0</span><span class="s1">, </span><span class="s2">0</span><span class="s1">);</span>
+    <span class="s1">}</span>
+
+    <span class="s0">public void </span><span class="s1">updateLocation() {</span>
+        <span class="s0">this</span><span class="s1">.location = LocationSystem.getCoords(gpsTagId);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">class </span><span class="s1">Lion </span><span class="s0">extends </span><span class="s1">Entity {</span>
+    <span class="s0">int </span><span class="s1">age;</span>
+
+    <span class="s0">public </span><span class="s1">Lion(String name, </span><span class="s0">int </span><span class="s1">age, </span><span class="s0">int </span><span class="s1">gpsTagId) {</span>
+        <span class="s0">super</span><span class="s1">(name, gpsTagId);</span>
+        <span class="s0">this</span><span class="s1">.age = age;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">class </span><span class="s1">Keeper </span><span class="s0">extends </span><span class="s1">Entity {</span>
+    <span class="s1">String phoneNumber;</span>
+
+    <span class="s0">public </span><span class="s1">Keeper(String name, String phoneNumber, </span><span class="s0">int </span><span class="s1">gpsTagId) {</span>
+        <span class="s0">super</span><span class="s1">(name, gpsTagId);</span>
+        <span class="s0">this</span><span class="s1">.phoneNumber = phoneNumber;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">class </span><span class="s1">Drone </span><span class="s0">extends </span><span class="s1">Entity {</span>
+    <span class="s0">int </span><span class="s1">radioFrequency;</span>
+
+    <span class="s0">public </span><span class="s1">Drone(String name, </span><span class="s0">int </span><span class="s1">radioFrequency, </span><span class="s0">int </span><span class="s1">gpsTagId) {</span>
+        <span class="s0">super</span><span class="s1">(name, gpsTagId);</span>
+        <span class="s0">this</span><span class="s1">.radioFrequency = radioFrequency;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">public class </span><span class="s1">LocationSystem {</span>
+    <span class="s3">// getCoords returns am AWT Point object that contains the co-ordinates of the GPS tag 'GPSid' passed in</span>
+    <span class="s3">// It can return null if it can't find the tag</span>
+    <span class="s3">// It can throw an Exception if it can't connect to the GPS system</span>
+    <span class="s0">public static </span><span class="s1">Point getCoords(</span><span class="s0">int </span><span class="s1">GPSid) </span><span class="s0">throws </span><span class="s1">IOException {</span>
+        <span class="s0">try    </span><span class="s1">{</span>
+            <span class="s3">// Connect to the location tracker system</span>
+            <span class="s1">URL myURL = </span><span class="s0">new </span><span class="s1">URL(</span><span class="s4">&quot;https://liontracker-2342d1c9d397.herokuapp.com/coords?tag=&quot;</span><span class="s1">+GPSid);</span>
+            <span class="s1">HttpURLConnection conn = (HttpURLConnection) myURL.openConnection();</span>
+            <span class="s1">conn.setRequestMethod(</span><span class="s4">&quot;GET&quot;</span><span class="s1">);</span>
+            <span class="s1">conn.setRequestProperty(</span><span class="s4">&quot;Accept&quot;</span><span class="s1">, </span><span class="s4">&quot;application/json&quot;</span><span class="s1">);</span>
+            <span class="s1">conn.setRequestProperty(</span><span class="s4">&quot;charset&quot;</span><span class="s1">, </span><span class="s4">&quot;utf-8&quot;</span><span class="s1">);</span>
+
+            <span class="s1">BufferedReader </span><span class="s0">in </span><span class="s1">= </span><span class="s0">new </span><span class="s1">BufferedReader(</span>
+                    <span class="s0">new </span><span class="s1">InputStreamReader(myURL.openStream()));</span>
+
+            <span class="s1">String inputLine;</span>
+            <span class="s1">String responseBody = </span><span class="s0">new </span><span class="s1">String();</span>
+            <span class="s3">// Read the body of the response</span>
+            <span class="s0">while </span><span class="s1">((inputLine = </span><span class="s0">in</span><span class="s1">.readLine()) != </span><span class="s0">null</span><span class="s1">) {</span>
+                <span class="s1">responseBody+=inputLine;</span>
+            <span class="s1">}</span>
+                    <span class="s0">in</span><span class="s1">.close();</span>
+            <span class="s3">// Convert from json</span>
+            <span class="s1">Gson gson=</span><span class="s0">new </span><span class="s1">Gson();</span>
+            <span class="s0">return </span><span class="s1">gson.fromJson(responseBody,Point.</span><span class="s0">class</span><span class="s1">);</span>
+        <span class="s1">}</span>
+        <span class="s0">catch</span><span class="s1">(Exception e){</span>
+            <span class="s1">System.out.println(e.getMessage());</span>
+        <span class="s1">}</span>
+        <span class="s0">return null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+
+<span class="s1">}</span>
+
+<span class="s0">class </span><span class="s1">WildlifeReserveMap </span><span class="s0">extends </span><span class="s1">JPanel {</span>
+    <span class="s0">private </span><span class="s1">Entity entities;</span>
+
+    <span class="s0">public </span><span class="s1">WildlifeReserveMap(List&lt;Entity&gt; entities) {</span>
+        <span class="s0">this</span><span class="s1">.entities = entities;</span>
+        <span class="s1">setPreferredSize(</span><span class="s0">new </span><span class="s1">Dimension(</span><span class="s2">600</span><span class="s1">, </span><span class="s2">600</span><span class="s1">));</span>
+    <span class="s1">}</span>
+
+    <span class="s1">@Override</span>
+    <span class="s0">protected void </span><span class="s1">paintComponent(Graphics g) {</span>
+        <span class="s0">super</span><span class="s1">.paintComponent(g);</span>
+
+        <span class="s0">for </span><span class="s1">(Entity entity : entities) {</span>
+            <span class="s0">if </span><span class="s1">(entity </span><span class="s0">instanceof </span><span class="s1">Lion) {</span>
+                <span class="s1">g.setColor(Color.RED);</span>
+                <span class="s1">g.fillOval(entity.location.x, entity.location.y, </span><span class="s2">6</span><span class="s1">, </span><span class="s2">6</span><span class="s1">); </span><span class="s3">// Radius 3</span>
+                <span class="s1">g.drawString(entity.name + </span><span class="s4">&quot;, Age: &quot; </span><span class="s1">+ ((Lion) entity).age, entity.location.x + </span><span class="s2">10</span><span class="s1">, entity.location.y);</span>
+            <span class="s1">} </span><span class="s0">else if </span><span class="s1">(entity </span><span class="s0">instanceof </span><span class="s1">Keeper) {</span>
+                <span class="s1">g.setColor(Color.BLUE);</span>
+                <span class="s1">g.fillOval(entity.location.x, entity.location.y, </span><span class="s2">4</span><span class="s1">, </span><span class="s2">4</span><span class="s1">); </span><span class="s3">// Radius 2</span>
+                <span class="s1">g.drawString(entity.name + </span><span class="s4">&quot;, Phone: &quot; </span><span class="s1">+ ((Keeper) entity).phoneNumber, entity.location.x + </span><span class="s2">10</span><span class="s1">, entity.location.y);</span>
+            <span class="s1">} </span><span class="s0">else if </span><span class="s1">(entity </span><span class="s0">instanceof </span><span class="s1">Drone) {</span>
+                <span class="s1">g.setColor(Color.BLACK);</span>
+                <span class="s1">g.fillRect(entity.location.x, entity.location.y, </span><span class="s2">6</span><span class="s1">, </span><span class="s2">6</span><span class="s1">); </span><span class="s3">// Edge 3</span>
+                <span class="s1">g.drawString(entity.name + </span><span class="s4">&quot;, Freq: &quot; </span><span class="s1">+ ((Drone) entity).radioFrequency, entity.location.x + </span><span class="s2">10</span><span class="s1">, entity.location.y);</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s0">public void </span><span class="s1">refreshMap() {</span>
+        <span class="s1">repaint();</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">public class </span><span class="s1">AlertSystem {</span>
+    <span class="s0">public static void </span><span class="s1">sendAlertkeeper(String phoneNumber){</span>
+        <span class="s1">System.out.println(</span><span class="s4">&quot;Ringing keeper on &quot;</span><span class="s1">+phoneNumber);</span>
+    <span class="s1">}</span>
+    <span class="s0">public static void </span><span class="s1">sendAlertdrone(</span><span class="s0">int </span><span class="s1">radioFrequency){</span>
+        <span class="s1">System.out.println(</span><span class="s4">&quot;Alerting drone on frequency&quot;</span><span class="s1">+radioFrequency);</span>
+    <span class="s1">}</span>
+<span class="s1">}</span>
+
+<span class="s0">public class </span><span class="s1">WildlifeReserveSystem {</span>
+    <span class="s0">private </span><span class="s1">List&lt;Entity&gt; entities;</span>
+    <span class="s0">private </span><span class="s1">WildlifeReserveMap map;</span>
+
+    <span class="s0">public </span><span class="s1">WildlifeReserveSystem() {</span>
+        <span class="s0">this</span><span class="s1">.entities = </span><span class="s0">new </span><span class="s1">ArrayList&lt;&gt;();</span>
+    <span class="s1">}</span>
+
+    <span class="s0">public void </span><span class="s1">addEntity(Entity entity) {</span>
+        <span class="s1">entities.add(entity);</span>
+    <span class="s1">}</span>
+
+    <span class="s0">public void </span><span class="s1">start() {</span>
+        <span class="s1">JFrame frame = </span><span class="s0">new </span><span class="s1">JFrame(</span><span class="s4">&quot;Wildlife Reserve Map&quot;</span><span class="s1">);</span>
+        <span class="s1">map = </span><span class="s0">new </span><span class="s1">WildlifeReserveMap(entities);</span>
+        <span class="s1">frame.add(map);</span>
+        <span class="s1">frame.pack();</span>
+        <span class="s1">frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);</span>
+        <span class="s1">frame.setVisible(</span><span class="s0">true</span><span class="s1">);</span>
+
+        <span class="s0">while </span><span class="s1">(</span><span class="s0">true</span><span class="s1">) {</span>
+            <span class="s0">for </span><span class="s1">(Entity entity : entities) {</span>
+                <span class="s1">entity.updateLocation();</span>
+            <span class="s1">}</span>
+            <span class="s1">map.refreshMap();</span>
+            <span class="s1">checkProximity();</span>
+            <span class="s0">try </span><span class="s1">{</span>
+                <span class="s1">Thread.sleep(</span><span class="s2">1000</span><span class="s1">);</span>
+            <span class="s1">} </span><span class="s0">catch </span><span class="s1">(InterruptedException e) {</span>
+                <span class="s1">e.printStackTrace();</span>
+            <span class="s1">}</span>
+        <span class="s1">}</span>
+    <span class="s1">}</span>
+
+    <span class="s0">private void </span><span class="s1">checkProximity() {</span>
+        <span class="s1">Lion = </span><span class="s0">null</span><span class="s1">;</span>
+        <span class="s1">Keeper = </span><span class="s0">null</span><span class="s1">;</span>
+        <span class="s1">Drone = </span><span class="s0">null</span><span class="s1">;</span>
+    <span class="s1">}</span>
+<span class="s1">}</span></pre>
+</body>
+</html>
