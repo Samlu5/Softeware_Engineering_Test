@@ -1,8 +1,9 @@
-Classes	and Inheritance	: 
-Encapsulation : 
-Polymorphism : 
-Exceptions and Error handling : 
-Organization : 
-Attempt : 
-Flexibility for Future : 
-Alerts :
+Classes	and Inheritance	: Good class names, but the draw method should be included within the subclasses - 7
+Encapsulation : All fields are public - 2
+Polymorphism : Correctly adding entities to a list, but you should include a draw method in the entity superclass, and
+override this in each class of entity, this is better than identifying the type of the object in a list of objects - 6
+Exceptions and Error handling : No error handling - 0
+Organization : No packages - 0
+Attempt : Solid attempt, but the unable to run the submitted code - 4
+Flexibility for Future : Uses an ArrayList for the superclass only - 7
+Alerts : No alerts - 0
