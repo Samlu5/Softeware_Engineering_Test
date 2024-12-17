@@ -1,8 +1,12 @@
 Classes	and Inheritance	: Good class names, but the draw method should be included within the subclasses - 7
-Encapsulation : All fields are public - 2
+Encapsulation : All fields are public. Access to fields should be restricted to the minimum necessary, due to the risk
+that external code might not understand how those fields are used internally, potentially leading to them going outside
+of a valid range. Give them 'private' visibility and access them from getters and setters. If they are in a superclass
+and need access from the subclass, make them 'protected'. - 2
 Polymorphism : Correctly adding entities to a list, but you should include a draw method in the entity superclass, and
 override this in each class of entity, this is better than identifying the type of the object in a list of objects - 6
-Exceptions and Error handling : No error handling - 0
+Exceptions and Error handling : Errors are handled, but it would be better if you showed an error message which was
+relevant to the LocationSystem - 9
 Organization : No packages - 0
 Attempt : Solid attempt, but the unable to run the submitted code - 4
 Flexibility for Future : Uses an ArrayList for the superclass only - 7
